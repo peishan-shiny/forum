@@ -31,17 +31,20 @@
 <script>
 //引用mixins.js檔案裡面的fromNowFilter物件，最後在export裡面新增mixins屬性代入
 import { fromNowFilter } from "../utils/mixins.js";
+import { mapState } from "vuex";
+//import { Toast } from "../utils/helpers";
+//import restaurantsAPI from "../apis/restaurants";
 
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "管理者",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+// const dummyUser = {
+//   currentUser: {
+//     id: 1,
+//     name: "管理者",
+//     email: "root@example.com",
+//     image: "https://i.pravatar.cc/300",
+//     isAdmin: true,
+//   },
+//   isAuthenticated: true,
+// };
 
 export default {
   name: "RestaurantComments",
@@ -54,18 +57,20 @@ export default {
     },
   },
 
-  data() {
-    return {
-      currentUser: dummyUser.currentUser,
-      isAuthenticated: dummyUser.isAuthenticated,
-    };
+  // data() {
+  //   return {
+  //     currentUser: currentUser,
+  //     isAuthenticated: isAuthenticated,
+  //   };
+  // },
+
+  computed: {
+    ...mapState(["currentUser", "isAuthenticated"]),
   },
 
   methods: {
     handleDeleteButtonClick(commentId) {
       console.log("handleDeleteButtonClick", commentId);
-
-      //發送API，請求伺服器，刪除該筆commentId的資料
       //使用$emit通知父元件去更新畫面 => $emit( '事件名稱' , 傳遞的資料 )
       //並且父元件掛載子元件的地方，加上v-on監聽器
       this.$emit("after-delete-comment", commentId);
@@ -73,3 +78,19 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+h2.my-4 {
+  margin-bottom: 1rem !important;
+  font-size: 18px;
+}
+
+h3 {
+  margin-bottom: 3px;
+  line-height: 1.3;
+}
+
+.blockquote-footer {
+  font-size: 12.5px;
+}
+</style>

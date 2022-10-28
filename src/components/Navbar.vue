@@ -35,6 +35,7 @@
             {{ currentUser.name || "使用者" }} 您好
           </router-link>
           <button
+            @click="logout"
             type="button"
             class="btn btn-sm btn-outline-success my-2 my-sm-0"
           >
@@ -47,43 +48,77 @@
 </template>
 
 <script>
-//dummyUser 是模擬api傳過來的假資料
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "root",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+import { mapState } from "vuex";
+
 export default {
-  //預設登入需要的空資料
-  data() {
-    return {
-      currentUser: {
-        id: -1,
-        name: "",
-        email: "",
-        image: "",
-        isAdmin: false,
-      },
-      isAuthenticated: false,
-    };
+  //mapState 屬性是vuex提供的一個方法，主要是取出vuex裡的state的資料
+  //computed 在vue裡主要是在偵測computed裡面的資料是否有改變，若有改變會重新運算
+  computed: {
+    ...mapState(["currentUser", "isAuthenticated"]),
   },
-  created() {
-    this.fetchUser();
-  },
+
   methods: {
-    fetchUser() {
-      this.currentUser = {
-        //...是物件結構賦值，有重複的屬性狀況下會以後面的為主，dummyUser.currentUser會蓋掉this.currentUser的值
-        ...this.currentUser,
-        ...dummyUser.currentUser,
-      };
-      this.isAuthenticated = dummyUser.isAuthenticated;
+    logout() {
+      this.$store.commit("revokeAuthentication");
+      this.$router.push("/signin");
     },
   },
 };
+
+// //dummyUser 是模擬api傳過來的假資料
+// const dummyUser = {
+//   currentUser: {
+//     id: 1,
+//     name: "root",
+//     email: "root@example.com",
+//     image: "https://i.pravatar.cc/300",
+//     isAdmin: true,
+//   },
+//   isAuthenticated: true,
+// };
+// export default {
+//   //預設登入需要的空資料
+//   data() {
+//     return {
+//       currentUser: {
+//         id: -1,
+//         name: "",
+//         email: "",
+//         image: "",
+//         isAdmin: false,
+//       },
+//       isAuthenticated: false,
+//     };
+//   },
+//   created() {
+//     this.fetchUser();
+//   },
+//   methods: {
+//     fetchUser() {
+//       this.currentUser = {
+//         //...是物件結構賦值，有重複的屬性狀況下會以後面的為主，dummyUser.currentUser會蓋掉this.currentUser的值
+//         ...this.currentUser,
+//         ...dummyUser.currentUser,
+//       };
+//       this.isAuthenticated = dummyUser.isAuthenticated;
+//     },
+//   },
+// };
 </script>
+
+<style scoped>
+.navbar-toggler {
+  min-width: 70px;
+  margin-right: 0;
+}
+
+nav.bg-dark {
+  padding: 14px 16px;
+  background-color: #bd2333 !important;
+}
+
+.navbar-brand {
+  font-size: 19px;
+  padding: 0;
+}
+</style>

@@ -14,7 +14,8 @@
 </template>
 
 <script>
-import { v4 as uuidv4 } from "uuid";
+import restaurantsAPI from "../apis/restaurants";
+import { Toast } from "../utils/helpers";
 
 export default {
   name: "CreateComment",
@@ -32,19 +33,42 @@ export default {
   },
 
   methods: {
-    handleSummit() {
-      console.log(this.text);
-      //發送API，請求伺服器，新增該筆資料
+    async handleSummit() {
+      //console.log(this.text);
+      try {
+        const { data } = await restaurantsAPI.addComments({
+          restaurantId: this.restaurantId,
+          text: this.text,
+        });
+        console.log(data);
 
-      //使用$emit通知父元件去更新畫面 => $emit( '事件名稱' , {傳遞的資料} )
-      //並且父元件掛載子元件的地方，加上v-on監聽器
-      this.$emit("after-create-comment", {
-        commentId: uuidv4(), // 尚未串接 API 暫時使用隨機的 id
-        restaurantId: this.restaurantId,
-        text: this.text,
-      });
-      this.text = ""; // 將表單內的資料清空
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        //使用$emit通知父元件去更新畫面 => $emit( '事件名稱' , {傳遞的資料} )
+        //並且父元件掛載子元件的地方，加上v-on監聽器
+        this.$emit("after-create-comment", {
+          commentId: data.commentId,
+          restaurantId: this.restaurantId,
+          text: this.text,
+        });
+
+        //傳遞資料給父層後，將表單內的資料清空
+        this.text = "";
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法新增評論",
+        });
+      }
     },
   },
 };
 </script>
+
+<style scoped>
+.form-group {
+  margin: 21px 0 8px;
+}
+</style>

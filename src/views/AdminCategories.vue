@@ -66,7 +66,10 @@
             </button>
             <button
               @click.stop.prevent="
-                updateCategory({ categoryId: category.id, name: category.name })
+                updateCategory(
+                  { categoryId: category.id },
+                  { name: category.name }
+                )
               "
               v-show="category.isEditing"
               type="button"
@@ -190,9 +193,12 @@ export default {
         return item;
       });
     },
-    async updateCategory({ categoryId, name }) {
+    async updateCategory(categoryId, name) {
       try {
-        const response = await adimnAPI.updateCategories({ categoryId, name });
+        // const a = categoryId;
+        // const b = name;
+        // console.log("a:", a, "b:", b);
+        const response = await adimnAPI.updateCategories(categoryId, name);
 
         if (response.data.status !== "success") {
           throw new Error(response.data.message);

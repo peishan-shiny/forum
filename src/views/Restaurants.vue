@@ -22,6 +22,8 @@
       :next-page="nextPage"
       :category-id="categoryId"
     />
+
+    <div v-show="restaurants.length < 1">此類別目前無餐廳資料！</div>
   </div>
 </template>
 

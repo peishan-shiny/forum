@@ -33,9 +33,24 @@ export default {
   mixins: [fromNowFilter],
 
   props: {
-    comments: {
+    initialComments: {
       type: Array,
       required: true,
+    },
+  },
+
+  data() {
+    return {
+      comments: this.initialComments,
+    };
+  },
+
+  watch: {
+    comments(newValue) {
+      this.comments = {
+        ...this.comments,
+        ...newValue,
+      };
     },
   },
 };

@@ -131,12 +131,16 @@ export default {
         });
 
         const { data } = response;
-        //console.log(response);
+        //console.log(data);
         if (data.status === "error") {
           throw new Error(data.message);
         }
+        //將token存在localStorage
         localStorage.setItem("token", data.token);
-
+        //將資料傳送至vuex儲存
+        //this.$store.comit 專門呼叫vuex的方法
+        this.$store.commit("setCurrentUser", data.user);
+        //成功轉址
         this.$router.push("/restaurants");
       } catch (error) {
         this.isProcessing = false;

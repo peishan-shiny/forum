@@ -3,14 +3,14 @@
     <div>
       <h1>{{ restaurant.name }}</h1>
       <span class="badge badge-secondary mt-1 mb-3">
-        {{ restaurant.Category.name }}
+        {{ restaurant.categoryName }}
       </span>
     </div>
 
     <hr />
 
     <ul>
-      <li>評論數： {{ restaurant.Comments.length }}</li>
+      <li>評論數： {{ restaurant.commentsLength }}</li>
       <li>瀏覽次數： {{ restaurant.viewCounts }}</li>
     </ul>
 
@@ -21,95 +21,56 @@
 </template>
 
 <script>
-const dummyData = {
-  restaurant: {
-    id: 1,
-    name: "Chase Kling",
-    tel: "621.126.1340",
-    address: "55005 Beer Valleys",
-    opening_hours: "08:00",
-    description:
-      "Ad officiis id voluptas est saepe dolorem maxime minima.\nNeque porro eum pariatur voluptatem vero autem praesentium qui excepturi.",
-    image:
-      "https://loremflickr.com/320/240/restaurant,food/?random=88.36185726282892",
-    viewCounts: 0,
-    createdAt: "2022-10-04T12:59:37.000Z",
-    updatedAt: "2022-10-04T12:59:37.000Z",
-    CategoryId: 1,
-    Category: {
-      id: 1,
-      name: "中式料理",
-      createdAt: "2022-10-04T12:59:37.000Z",
-      updatedAt: "2022-10-04T12:59:37.000Z",
-    },
-    Comments: [
-      {
-        id: 51,
-        text: "Sunt quo et voluptate.",
-        UserId: 1,
-        RestaurantId: 1,
-        createdAt: "2022-10-04T12:59:37.000Z",
-        updatedAt: "2022-10-04T12:59:37.000Z",
-        User: {
-          id: 1,
-          name: "root",
-          email: "root@example.com",
-          password:
-            "$2a$10$ewLo/FPRB2VDm1batVFu6O4bhg3cwyOgzywrULPO4pwmuaA8tOmu.",
-          isAdmin: true,
-          image: null,
-          createdAt: "2022-10-04T12:59:37.000Z",
-          updatedAt: "2022-10-04T12:59:37.000Z",
-        },
-      },
-      {
-        id: 101,
-        text: "Cupiditate quas quod.",
-        UserId: 2,
-        RestaurantId: 1,
-        createdAt: "2022-10-04T12:59:37.000Z",
-        updatedAt: "2022-10-04T12:59:37.000Z",
-        User: {
-          id: 2,
-          name: "user1",
-          email: "user1@example.com",
-          password:
-            "$2a$10$MiqC0EhI44DI7uIVh6ZDtuOpQSC0/pAn2Q0ggsrpTD/DIreCQWgtC",
-          isAdmin: false,
-          image: null,
-          createdAt: "2022-10-04T12:59:37.000Z",
-          updatedAt: "2022-10-04T12:59:37.000Z",
-        },
-      },
-      {
-        id: 1,
-        text: "Ut saepe quia tempora explicabo facilis mollitia.",
-        UserId: 3,
-        RestaurantId: 1,
-        createdAt: "2022-10-04T12:59:37.000Z",
-        updatedAt: "2022-10-04T12:59:37.000Z",
-        User: {
-          id: 3,
-          name: "user2",
-          email: "user2@example.com",
-          password:
-            "$2a$10$gn0ZWlVaqy5zVWFj7MtUmO7FQsKnxp48wjegMtTVMMW1CaVvwiTmO",
-          isAdmin: false,
-          image: null,
-          createdAt: "2022-10-04T12:59:37.000Z",
-          updatedAt: "2022-10-04T12:59:37.000Z",
-        },
-      },
-    ],
-  },
-};
+import restaurantsAPI from "../apis/restaurants";
+import { Toast } from "../utils/helpers";
 
 export default {
   name: "RestaurantDashboard",
   data() {
     return {
-      restaurant: dummyData.restaurant,
+      restaurant: {
+        id: -1,
+        name: "",
+        categoryName: "",
+        commentsLength: -1,
+        viewCounts: -1,
+      },
     };
+  },
+  created() {
+    const { id } = this.$route.params;
+    //console.log(id);
+    this.fetchRestaurant(id);
+  },
+  methods: {
+    async fetchRestaurant(restaurantId) {
+      try {
+        const response = await restaurantsAPI.getRestaurant(restaurantId);
+        //console.log(response);
+        const { restaurant } = response.data;
+        const { id, name, Category, Comments, viewCounts } = restaurant;
+        this.restaurant = {
+          ...this.restaurant,
+          id: id,
+          name: name,
+          categoryName: Category.name,
+          commentsLength: Comments.length,
+          viewCounts: viewCounts,
+        };
+        console.log(this.restaurant);
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法顯示資料",
+        });
+      }
+    },
+  },
+  beforeRouteUpdate(to, from, next) {
+    //console.log(to, from);
+    const { id } = to.params;
+    this.fetchRestaurant(id);
+    next();
   },
 };
 </script>

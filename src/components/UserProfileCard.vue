@@ -10,18 +10,18 @@
           <p class="card-text">{{ profile.email }}</p>
           <ul class="list-unstyled list-inline">
             <li>
-              <strong>{{ profile.Comments.length }}</strong> 已評論餐廳
+              <strong>{{ profile.comments.length }}</strong> 已評論餐廳
             </li>
             <li>
-              <strong>{{ profile.FavoritedRestaurants.length }}</strong>
+              <strong>{{ profile.favoritedRestaurants.length }}</strong>
               收藏的餐廳
             </li>
             <li>
-              <strong>{{ profile.Followings.length }}</strong> followings
+              <strong>{{ profile.followings.length }}</strong> followings
               (追蹤者)
             </li>
             <li>
-              <strong>{{ profile.Followers.length }}</strong> followers (追隨者)
+              <strong>{{ profile.followers.length }}</strong> followers (追隨者)
             </li>
           </ul>
           <p>
@@ -34,14 +34,16 @@
             >
             <template v-else>
               <button
-                @click.stop.prevent="addFollowing"
+                v-if="!this.isFollowed"
+                @click.stop.prevent="addFollowing(profile.id)"
                 type="submit"
                 class="btn btn-primary"
               >
                 追蹤
               </button>
               <button
-                @click.stop.prevent="deleteFollowing"
+                v-else
+                @click.stop.prevent="deleteFollowing(profile.id)"
                 type="submit"
                 class="btn btn-danger"
               >
@@ -56,16 +58,20 @@
 </template>
 
 <script>
-const dummyUser = {
-  currentUser: {
-    id: 1,
-    name: "root",
-    email: "root@example.com",
-    image: "https://i.pravatar.cc/300",
-    isAdmin: true,
-  },
-  isAuthenticated: true,
-};
+import { mapState } from "vuex";
+import { Toast } from "../utils/helpers";
+import usersAPI from "../apis/users";
+
+// const dummyUser = {
+//   currentUser: {
+//     id: 1,
+//     name: "root",
+//     email: "root@example.com",
+//     image: "https://i.pravatar.cc/300",
+//     isAdmin: true,
+//   },
+//   isAuthenticated: true,
+// };
 
 export default {
   name: "UserProfileCard",
@@ -79,27 +85,66 @@ export default {
       required: true,
     },
   },
+
+  // watch: {
+  //   initialIsFollowed(newValue) {
+  //     this.isFollowed = {
+  //       ...this.isFollowed,
+  //       ...newValue,
+  //     };
+  //   },
+  // },
+
   data() {
     return {
       isFollowed: this.initialIsFollowed,
     };
   },
 
+  //使用mapState取出目前使用者
+  computed: {
+    ...mapState(["currentUser", "isAuthenticated"]),
+  },
+
   methods: {
     checkedUser(profileId) {
-      if (profileId === dummyUser.currentUser.id) {
+      if (profileId === this.currentUser.id) {
         return true;
       }
     },
 
-    addFollowing() {
-      console.log("add");
-      this.isFollowed = true;
+    async addFollowing(profileId) {
+      try {
+        const response = await usersAPI.addFollowing(profileId);
+        //console.log(response);
+        if (response.data.status !== "success") {
+          throw new Error(response.data.message);
+        }
+
+        this.isFollowed = true;
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法追蹤",
+        });
+      }
     },
 
-    deleteFollowing() {
-      console.log("delete");
-      this.isFollowed = false;
+    async deleteFollowing(profileId) {
+      try {
+        const response = await usersAPI.deleteFollowing(profileId);
+        //console.log(response);
+        if (response.data.status !== "success") {
+          throw new Error(response.data.message);
+        }
+
+        this.isFollowed = false;
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法取消",
+        });
+      }
     },
   },
 };

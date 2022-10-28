@@ -42,7 +42,7 @@
 
       <button
         v-if="restaurant.isFavorited"
-        @click.stop.prevent="deleteFavorited"
+        @click.stop.prevent="deleteFavorited(restaurant.id)"
         type="button"
         class="btn btn-danger btn-border mr-2"
       >
@@ -50,7 +50,7 @@
       </button>
       <button
         v-else
-        @click.stop.prevent="addFavorited"
+        @click.stop.prevent="addFavorited(restaurant.id)"
         type="button"
         class="btn btn-primary btn-border mr-2"
       >
@@ -58,7 +58,7 @@
       </button>
       <button
         v-if="restaurant.isLiked"
-        @click.stop.prevent="deleteLike"
+        @click.stop.prevent="deleteLike(restaurant.id)"
         type="button"
         class="btn btn-danger like mr-2"
       >
@@ -66,7 +66,7 @@
       </button>
       <button
         v-else
-        @click.stop.prevent="addLike"
+        @click.stop.prevent="addLike(restaurant.id)"
         type="button"
         class="btn btn-primary like mr-2"
       >
@@ -77,6 +77,9 @@
 </template>
 
 <script>
+import usersAPI from "../apis/users";
+import { Toast } from "../utils/helpers";
+
 export default {
   name: "RestaurantDetail",
   props: {
@@ -91,30 +94,94 @@ export default {
     };
   },
 
+  //這種有父層子層且父層需傳資料給子層，且父層資料由後端API提供，需要在子層裝watch監聽，當父層資料有改變時，將新資料寫入
+  //監聽initialRestaurant，當initialRestaurant有任何改變時，將新的資料傳入，把資料寫入元件
+  watch: {
+    //須帶一個新資料的參數 newValue
+    initialRestaurant(newValue) {
+      this.restaurant = {
+        ...this.restaurant,
+        ...newValue,
+      };
+    },
+  },
+
   methods: {
-    addFavorited() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: true,
-      };
+    async addFavorited(restaurantId) {
+      try {
+        const { data } = await usersAPI.addFavorite({ restaurantId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: true,
+        };
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法增加至我的最愛",
+        });
+      }
     },
-    deleteFavorited() {
-      this.restaurant = {
-        ...this.restaurant,
-        isFavorited: false,
-      };
+    async deleteFavorited(restaurantId) {
+      try {
+        const { data } = await usersAPI.deleteFavorite({ restaurantId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.restaurant = {
+          ...this.restaurant,
+          isFavorited: false,
+        };
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法刪除我的最愛",
+        });
+      }
     },
-    addLike() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: true,
-      };
+    async addLike(restaurantId) {
+      try {
+        const { data } = await usersAPI.addLike({ restaurantId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: true,
+        };
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法點讚",
+        });
+      }
     },
-    deleteLike() {
-      this.restaurant = {
-        ...this.restaurant,
-        isLiked: false,
-      };
+    async deleteLike(restaurantId) {
+      try {
+        const { data } = await usersAPI.deleteLike({ restaurantId });
+
+        if (data.status !== "success") {
+          throw new Error(data.message);
+        }
+
+        this.restaurant = {
+          ...this.restaurant,
+          isLiked: false,
+        };
+      } catch (error) {
+        Toast.fire({
+          icon: "warning",
+          title: "無法刪除",
+        });
+      }
     },
   },
   // methods: {
@@ -129,3 +196,12 @@ export default {
   // },
 };
 </script>
+
+<style scoped>
+.col-lg-8 p,
+.contact-info-wrap li,
+.contact-info-wrap strong {
+  font-family: serif;
+  font-size: 17px;
+}
+</style>
